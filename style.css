@@ -40,23 +40,30 @@ body {
 
 #top .menu span:hover { opacity: 1; text-decoration: underline; }
 
-/* desktop app icons */
+/* desktop app icons — absolutely positioned so they can be dragged around */
 #desktopApps {
-  padding-top: 64px;
-  padding-left: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: fit-content;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .appicon {
+  position: absolute;
   text-align: center;
   padding: 12px;
   filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.6));
-  width: fit-content;
-  cursor: pointer;
+  width: 88px;
+  cursor: grab;
   border-radius: 12px;
+  user-select: none;
+}
+
+.appicon.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.7));
 }
 
 .appicon .glyph {
@@ -435,6 +442,7 @@ body {
 
 .weather-search button:hover { background: #fff; }
 .unit-toggle { min-width: 40px; }
+.weather-search .icon-btn { padding: 8px; display: flex; align-items: center; justify-content: center; }
 
 .weather-current {
   display: flex;

@@ -109,12 +109,90 @@ function handleIconTap(element) {
 }
 
 // Part 5 refactor: one reusable function wires any desktop icon to its window
-// (single click selects the icon, double click opens the window)
+// (single click selects, double click opens, and the icon can be dragged around)
 function initializeIcon(iconId, windowId) {
   var icon = document.querySelector("#" + iconId);
   var win = document.querySelector("#" + windowId);
-  icon.addEventListener("click", function () { handleIconTap(icon); });
-  icon.addEventListener("dblclick", function () { openWindow(win); });
+  icon.addEventListener("click", function () {
+    if (icon._justDragged) return;
+    handleIconTap(icon);
+  });
+  icon.addEventListener("dblclick", function () {
+    if (icon._justDragged) return;
+    openWindow(win);
+  });
+  makeIconDraggable(icon);
+}
+
+// ---- desktop icon drag & drop (positions persist in localStorage) ----
+var ICON_KEY = "blackbird-icons";
+
+function loadIconPositions() {
+  try {
+    var s = localStorage.getItem(ICON_KEY);
+    if (s) return JSON.parse(s);
+  } catch (e) {}
+  return {};
+}
+
+var iconPositions = loadIconPositions();
+
+function saveIconPositions() {
+  try { localStorage.setItem(ICON_KEY, JSON.stringify(iconPositions)); } catch (e) {}
+}
+
+function layoutIcons() {
+  var apps = document.querySelectorAll(".appicon");
+  var startY = 72, gap = 100, x = 16;
+  apps.forEach(function (icon, i) {
+    var saved = iconPositions[icon.id];
+    icon.style.left = (saved ? saved.x : x) + "px";
+    icon.style.top = (saved ? saved.y : startY + i * gap) + "px";
+  });
+}
+
+function makeIconDraggable(icon) {
+  var startX, startY, originLeft, originTop, moved = false;
+
+  icon.addEventListener("mousedown", function (e) {
+    if (e.button !== 0) return;
+    moved = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    originLeft = icon.offsetLeft;
+    originTop = icon.offsetTop;
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    e.preventDefault();
+  });
+
+  function onMove(e) {
+    var dx = e.clientX - startX;
+    var dy = e.clientY - startY;
+    if (!moved && Math.abs(dx) + Math.abs(dy) > 4) {
+      moved = true;
+      icon.classList.add("dragging");
+    }
+    if (moved) {
+      var nx = Math.max(0, Math.min(originLeft + dx, window.innerWidth - icon.offsetWidth));
+      var ny = Math.max(44, Math.min(originTop + dy, window.innerHeight - icon.offsetHeight));
+      icon.style.left = nx + "px";
+      icon.style.top = ny + "px";
+    }
+  }
+
+  function onUp() {
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onUp);
+    if (moved) {
+      icon.classList.remove("dragging");
+      iconPositions[icon.id] = { x: icon.offsetLeft, y: icon.offsetTop };
+      saveIconPositions();
+      // suppress the click that fires right after a drag so it doesn't toggle selection
+      icon._justDragged = true;
+      setTimeout(function () { icon._justDragged = false; }, 0);
+    }
+  }
 }
 
 // clicking empty desktop clears the selection
@@ -588,11 +666,53 @@ renderProjects();
       .catch(function () { setError("Couldn't reach the weather service."); });
   }
 
+  // turn coordinates into a readable "City, CC" label, then load the forecast
+  function reverseAndLoad(lat, lon) {
+    fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en&latitude=" + lat + "&longitude=" + lon)
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var place = j.city || j.locality || j.principalSubdivision || "My location";
+        if (j.countryCode) place += ", " + j.countryCode;
+        loadByCoords(lat, lon, place);
+      })
+      .catch(function () { loadByCoords(lat, lon, "My location"); });
+  }
+
+  // no-permission fallback: locate by IP address
+  function ipLocate() {
+    fetch("https://ipwho.is/")
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.latitude != null) {
+          var place = (j.city || "My location") + (j.country_code ? ", " + j.country_code : "");
+          loadByCoords(j.latitude, j.longitude, place);
+        } else {
+          searchCity("San Francisco");
+        }
+      })
+      .catch(function () { searchCity("San Francisco"); });
+  }
+
+  function useMyLocation() {
+    setLoading();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (pos) { reverseAndLoad(pos.coords.latitude, pos.coords.longitude); },
+        function () { ipLocate(); },
+        { timeout: 6000, maximumAge: 600000 }
+      );
+    } else {
+      ipLocate();
+    }
+  }
+
   unitBtn.addEventListener("click", function () {
     useFahrenheit = !useFahrenheit;
     unitBtn.textContent = useFahrenheit ? "°F" : "°C";
     if (lastQuery) loadByCoords(lastQuery.lat, lastQuery.lon, lastQuery.place);
   });
+
+  document.querySelector("#weatherLocate").addEventListener("click", useMyLocation);
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -600,17 +720,7 @@ renderProjects();
     if (q) searchCity(q);
   });
 
-  // first load: try geolocation, fall back to a default city
-  setLoading();
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      function (pos) { loadByCoords(pos.coords.latitude, pos.coords.longitude, "My location"); },
-      function () { searchCity("San Francisco"); },
-      { timeout: 6000 }
-    );
-  } else {
-    searchCity("San Francisco");
-  }
+  useMyLocation();
 })();
 
 // ---- wire up the icons + windows ----
@@ -625,3 +735,5 @@ initializeWindow("notes");
 initializeWindow("projects");
 initializeWindow("calc");
 initializeWindow("weather");
+
+layoutIcons();

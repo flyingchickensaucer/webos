@@ -183,6 +183,13 @@
       <form class="weather-search" id="weatherForm">
         <input id="weatherInput" placeholder="Search a city..." autocomplete="off" />
         <button type="submit">Go</button>
+        <button type="button" id="weatherLocate" class="icon-btn" title="Use my location">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="#2b5876" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="5" stroke="#2b5876" stroke-width="2"/>
+            <circle cx="12" cy="12" r="1.5" fill="#2b5876"/>
+          </svg>
+        </button>
         <button type="button" id="weatherUnit" class="unit-toggle">°F</button>
       </form>
       <div class="weather-current" id="weatherCurrent"></div>
