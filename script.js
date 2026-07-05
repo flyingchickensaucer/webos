@@ -765,7 +765,10 @@ var galleryImages = [
   { src: "notes.png", caption: "Notes" },
   { src: "projects.png", caption: "Projects" },
   { src: "calculator.png", caption: "Calculator" },
-  { src: "weather.png", caption: "Weather" }
+  { src: "weather.png", caption: "Weather" },
+  { src: "gallery.png", caption: "Gallery" },
+  { src: "Search.png", caption: "Search" },
+  { src: "settings.png", caption: "Settings" }
 ];
 
 function renderGallery() {
