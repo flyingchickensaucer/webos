@@ -6,8 +6,7 @@ body {
   overflow: hidden;
   color: #fff;
   /* wallpaper */
-  background: linear-gradient(135deg, #1e3c72, #2a5298, #6dd5ed);
-  background-size: cover;
+  background: #1e3c72 url("background.png") center / cover no-repeat;
 }
 
 /* top bar */
