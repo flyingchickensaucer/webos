@@ -108,6 +108,15 @@ function handleIconTap(element) {
   }
 }
 
+// Part 5 refactor: one reusable function wires any desktop icon to its window
+// (single click selects the icon, double click opens the window)
+function initializeIcon(iconId, windowId) {
+  var icon = document.querySelector("#" + iconId);
+  var win = document.querySelector("#" + windowId);
+  icon.addEventListener("click", function () { handleIconTap(icon); });
+  icon.addEventListener("dblclick", function () { openWindow(win); });
+}
+
 // clicking empty desktop clears the selection
 document.body.addEventListener("mousedown", function (e) {
   if (!e.target.closest(".appicon")) {
@@ -243,6 +252,140 @@ function deleteNote(index) {
 renderSidebar();
 if (content.length > 0) openNote(0);
 
-// ---- wire up the windows ----
+// ---- Part 5: advanced app — Projects ----
+var projects = [
+  { name: "Crossfire Vault", type: "Game", tag: "Real-time 3D multiplayer stealth heist.",
+    body: "Two crews rob each other's vaults deep in a cover-dense, vertical facility. You score only by stealing the enemy's loot and hauling it to your extraction — you win by extracted value, not kills. Sneak in, crack the vault, then carry the loot back slow and exposed." },
+  { name: "RECOIL", type: "Game", tag: "Your gun is your engine.",
+    body: "You can't walk, thrust, or steer — the only force you control is the kick of your weapon. Every shot shoves you the opposite way. To fly right you aim left and fire; to brake you shoot the way you're drifting. Movement and combat are the same act." },
+  { name: "STASIS", type: "Game", tag: "Time moves only when you do.",
+    body: "A top-down arena where every bullet and enemy freezes the instant you stand still, and snaps to full speed the moment you move. Weave through frozen bullet-storms, line up your shot, then dart. One hit ends it." },
+  { name: "Signal Drift", type: "Game", tag: "Decode transmissions on a hex grid.",
+    body: "A browser puzzle-strategy game. You're a deep-space relay operator intercepting fragmented transmissions and decoding them by routing energy across a hexagonal grid. Your decoding choices branch the narrative and gate which levels you see next." },
+  { name: "Sunstone", type: "Game", tag: "A pixel RPG built from nothing but code.",
+    body: "A self-contained 2D pixel-art RPG on the HTML5 Canvas with vanilla ES modules. No external assets — every sprite, tile, portrait, sound effect, and music track is generated procedurally at runtime." },
+  { name: "Chroma Rift", type: "Game", tag: "Match the color. Break the rift.",
+    body: "Online and local versus. Grab XP orbs to power up; first to 8 KOs wins." },
+  { name: "Catacombs of Yendor", type: "Game", tag: "A roguelike dungeon crawler.",
+    body: "Descend into the catacombs, fight what's waiting down there, and try not to meet the YOU DIED screen. Reach the bottom for victory." },
+  { name: "Gravity Wells", type: "Game", tag: "A gravity sandbox.",
+    body: "Click anywhere to bend space, drag to fling particles, and scroll over a well to grow it." },
+  { name: "Midnight Garden", type: "Game", tag: "A calm planting toy.",
+    body: "Click the ground to plant something, let it grow, and watch the sky turn." },
+  { name: "Preflight", type: "Study", tag: "FAA Private Pilot study app.",
+    body: "A dark, mobile-first study app for the FAA Private Pilot written test and the checkride oral exam, built with Expo / React Native for Android." },
+  { name: "Trial Run", type: "Tool", tag: "Human-like auto-typer.",
+    body: "Types text into the active editor one character at a time with randomized, human-like timing and periodic breaks." },
+  { name: "Stardance", type: "Web", tag: "The web OS you're looking at.",
+    body: "This site — a little web-based operating system with draggable windows, a top bar and clock, and apps like this one. Built for Hack Club's Stardance." }
+];
+
+var FILTERS = ["All", "Games", "Tools", "Study"];
+var projectFilter = "All";
+var selectedProject = 0;
+
+function typeColor(type) {
+  if (type === "Study") return "#9ece6a";
+  if (type === "Tool" || type === "Web") return "#f6c177";
+  return "#6dd5ed"; // Game
+}
+
+function matchesFilter(type) {
+  if (projectFilter === "Games") return type === "Game";
+  if (projectFilter === "Tools") return type === "Tool" || type === "Web";
+  if (projectFilter === "Study") return type === "Study";
+  return true;
+}
+
+function renderFilters() {
+  var bar = document.querySelector("#projectFilters");
+  bar.innerHTML = "";
+  FILTERS.forEach(function (f) {
+    var pill = document.createElement("span");
+    pill.className = "filter-pill" + (f === projectFilter ? " active" : "");
+    pill.textContent = f;
+    pill.addEventListener("click", function () {
+      projectFilter = f;
+      var visible = visibleIndexes();
+      if (visible.indexOf(selectedProject) === -1 && visible.length) selectedProject = visible[0];
+      renderProjects();
+    });
+    bar.appendChild(pill);
+  });
+}
+
+function visibleIndexes() {
+  var out = [];
+  for (var i = 0; i < projects.length; i++) {
+    if (matchesFilter(projects[i].type)) out.push(i);
+  }
+  return out;
+}
+
+function renderGrid() {
+  var grid = document.querySelector("#projectGrid");
+  grid.innerHTML = "";
+  visibleIndexes().forEach(function (i) {
+    var p = projects[i];
+    var card = document.createElement("div");
+    card.className = "project-card" + (i === selectedProject ? " active" : "");
+    card.style.borderLeftColor = typeColor(p.type);
+
+    var name = document.createElement("p");
+    name.className = "project-name";
+    name.textContent = p.name;
+    var tag = document.createElement("p");
+    tag.className = "project-tag";
+    tag.textContent = p.tag;
+
+    card.appendChild(name);
+    card.appendChild(tag);
+    card.addEventListener("click", function () {
+      selectedProject = i;
+      renderProjects();
+    });
+    grid.appendChild(card);
+  });
+}
+
+function showProjectDetail() {
+  var detail = document.querySelector("#projectDetail");
+  var p = projects[selectedProject];
+  detail.innerHTML = "";
+
+  var badge = document.createElement("span");
+  badge.className = "project-badge";
+  badge.textContent = p.type;
+  badge.style.background = typeColor(p.type);
+
+  var name = document.createElement("h2");
+  name.textContent = p.name;
+  var tag = document.createElement("p");
+  tag.className = "detail-tag";
+  tag.textContent = p.tag;
+  var body = document.createElement("p");
+  body.className = "detail-body";
+  body.textContent = p.body;
+
+  detail.appendChild(badge);
+  detail.appendChild(name);
+  detail.appendChild(tag);
+  detail.appendChild(body);
+}
+
+function renderProjects() {
+  renderFilters();
+  renderGrid();
+  showProjectDetail();
+}
+
+renderProjects();
+
+// ---- wire up the icons + windows ----
+initializeIcon("welcomeicon", "welcome");
+initializeIcon("notesicon", "notes");
+initializeIcon("projectsicon", "projects");
+
 initializeWindow("welcome");
 initializeWindow("notes");
+initializeWindow("projects");

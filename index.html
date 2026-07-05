@@ -14,19 +14,31 @@
     <div class="menu">
       <span id="welcomeopen">Welcome</span>
       <span id="notesopen">Notes</span>
+      <span id="projectsopen">Projects</span>
       <span id="timeElement">Time</span>
     </div>
   </div>
 
-  <!-- Part 4: desktop app icons -->
+  <!-- Part 4: desktop app icons (wired up in script.js via initializeIcon) -->
   <div id="desktopApps">
-    <div class="appicon" id="notesicon" onclick="handleIconTap(this)" ondblclick="openWindow(document.querySelector('#notes'))">
+    <div class="appicon" id="welcomeicon">
+      <div class="glyph"><img src="blackbird.webp" alt="Blackbird"></div>
+      <p>Welcome</p>
+    </div>
+    <div class="appicon" id="notesicon">
       <div class="glyph"><img src="notes.jpg" alt="Notes"></div>
       <p>Notes</p>
     </div>
-    <div class="appicon" id="welcomeicon" onclick="handleIconTap(this)" ondblclick="openWindow(document.querySelector('#welcome'))">
-      <div class="glyph"><img src="blackbird.webp" alt="Blackbird"></div>
-      <p>Welcome</p>
+    <div class="appicon" id="projectsicon">
+      <div class="glyph">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="13" height="13" rx="3" fill="#fff"/>
+          <rect x="19" y="2" width="13" height="13" rx="3" fill="#fff" opacity="0.7"/>
+          <rect x="2" y="19" width="13" height="13" rx="3" fill="#fff" opacity="0.7"/>
+          <rect x="19" y="19" width="13" height="13" rx="3" fill="#fff"/>
+        </svg>
+      </div>
+      <p>Projects</p>
     </div>
   </div>
 
@@ -65,6 +77,22 @@
     <div class="appbody">
       <div id="sidebar"></div>
       <div id="notecontent"></div>
+    </div>
+  </div>
+
+  <!-- Part 5: advanced app — Projects browser with category filters + detail view -->
+  <div class="window" id="projects" style="top: calc(50% - 250px); left: calc(50% - 330px); display: none;">
+    <div class="windowheader" id="projectsheader">
+      <div class="closebutton" id="projectsclose"></div>
+      <p class="headertext">Projects</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="projectsbody">
+      <div class="projects-list">
+        <div class="filters" id="projectFilters"></div>
+        <div id="projectGrid"></div>
+      </div>
+      <div class="projects-detail" id="projectDetail"></div>
     </div>
   </div>
 
