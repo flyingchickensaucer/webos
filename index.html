@@ -15,6 +15,8 @@
       <span id="welcomeopen">Welcome</span>
       <span id="notesopen">Notes</span>
       <span id="projectsopen">Projects</span>
+      <span id="calcopen">Calculator</span>
+      <span id="weatheropen">Weather</span>
       <span id="timeElement">Time</span>
     </div>
   </div>
@@ -30,15 +32,51 @@
       <p>Notes</p>
     </div>
     <div class="appicon" id="projectsicon">
-      <div class="glyph">
-        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="2" width="13" height="13" rx="3" fill="#fff"/>
-          <rect x="19" y="2" width="13" height="13" rx="3" fill="#fff" opacity="0.7"/>
-          <rect x="2" y="19" width="13" height="13" rx="3" fill="#fff" opacity="0.7"/>
-          <rect x="19" y="19" width="13" height="13" rx="3" fill="#fff"/>
+      <div class="glyph tile">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="projG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#11998e"/><stop offset="1" stop-color="#38ef7d"/>
+          </linearGradient></defs>
+          <rect width="64" height="64" rx="16" fill="url(#projG)"/>
+          <rect x="14" y="14" width="15" height="15" rx="4" fill="#fff"/>
+          <rect x="35" y="14" width="15" height="15" rx="4" fill="#fff" opacity="0.75"/>
+          <rect x="14" y="35" width="15" height="15" rx="4" fill="#fff" opacity="0.75"/>
+          <rect x="35" y="35" width="15" height="15" rx="4" fill="#fff"/>
         </svg>
       </div>
       <p>Projects</p>
+    </div>
+    <div class="appicon" id="calcicon">
+      <div class="glyph tile">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="calcG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7b5cff"/><stop offset="1" stop-color="#4a2fd0"/>
+          </linearGradient></defs>
+          <rect width="64" height="64" rx="16" fill="url(#calcG)"/>
+          <rect x="14" y="12" width="36" height="12" rx="3" fill="#fff" opacity="0.9"/>
+          <g fill="#fff">
+            <circle cx="19" cy="34" r="3.5"/><circle cx="30" cy="34" r="3.5"/><circle cx="41" cy="34" r="3.5"/>
+            <circle cx="19" cy="45" r="3.5"/><circle cx="30" cy="45" r="3.5"/><circle cx="41" cy="45" r="3.5"/>
+          </g>
+        </svg>
+      </div>
+      <p>Calculator</p>
+    </div>
+    <div class="appicon" id="weathericon">
+      <div class="glyph tile">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="wthG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#4a90e2"/><stop offset="1" stop-color="#6dd5ed"/>
+          </linearGradient></defs>
+          <rect width="64" height="64" rx="16" fill="url(#wthG)"/>
+          <circle cx="26" cy="24" r="9" fill="#ffd257"/>
+          <g fill="#fff">
+            <circle cx="30" cy="42" r="8"/><circle cx="42" cy="40" r="10"/>
+            <circle cx="24" cy="46" r="7"/><rect x="24" y="42" width="24" height="10" rx="5"/>
+          </g>
+        </svg>
+      </div>
+      <p>Weather</p>
     </div>
   </div>
 
@@ -57,8 +95,9 @@
       <div class="name">Blackbird</div>
 
       <p class="tagline">
-        Welcome to my WebOS. I like building things, games, learning, and coffee.
-        Double-click an icon to open an app, and drag windows by their header.
+        Hi, I'm Blackbird. I build browser games, chase side projects, and run on
+        coffee. This is my desktop — double-click an icon to open an app, drag
+        windows by their header, and poke around.
       </p>
 
       <p class="links">
@@ -93,6 +132,61 @@
         <div id="projectGrid"></div>
       </div>
       <div class="projects-detail" id="projectDetail"></div>
+    </div>
+  </div>
+
+  <!-- Extra app: Calculator -->
+  <div class="window" id="calc" style="top: calc(50% - 220px); left: calc(50% + 40px); display: none;">
+    <div class="windowheader" id="calcheader">
+      <div class="closebutton" id="calcclose"></div>
+      <p class="headertext">Calculator</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="calcbody">
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-keys">
+        <button class="ckey fn" data-action="clear">AC</button>
+        <button class="ckey fn" data-action="negate">+/−</button>
+        <button class="ckey fn" data-action="percent">%</button>
+        <button class="ckey op" data-op="/">÷</button>
+
+        <button class="ckey" data-num="7">7</button>
+        <button class="ckey" data-num="8">8</button>
+        <button class="ckey" data-num="9">9</button>
+        <button class="ckey op" data-op="*">×</button>
+
+        <button class="ckey" data-num="4">4</button>
+        <button class="ckey" data-num="5">5</button>
+        <button class="ckey" data-num="6">6</button>
+        <button class="ckey op" data-op="-">−</button>
+
+        <button class="ckey" data-num="1">1</button>
+        <button class="ckey" data-num="2">2</button>
+        <button class="ckey" data-num="3">3</button>
+        <button class="ckey op" data-op="+">+</button>
+
+        <button class="ckey zero" data-num="0">0</button>
+        <button class="ckey" data-action="dot">.</button>
+        <button class="ckey eq" data-action="equals">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extra app: Weather (live data from Open-Meteo, no API key) -->
+  <div class="window" id="weather" style="top: calc(50% - 230px); left: calc(50% - 400px); display: none;">
+    <div class="windowheader" id="weatherheader">
+      <div class="closebutton" id="weatherclose"></div>
+      <p class="headertext">Weather</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="weatherbody">
+      <form class="weather-search" id="weatherForm">
+        <input id="weatherInput" placeholder="Search a city..." autocomplete="off" />
+        <button type="submit">Go</button>
+        <button type="button" id="weatherUnit" class="unit-toggle">°F</button>
+      </form>
+      <div class="weather-current" id="weatherCurrent"></div>
+      <div class="weather-forecast" id="weatherForecast"></div>
     </div>
   </div>
 

@@ -381,11 +381,247 @@ function renderProjects() {
 
 renderProjects();
 
+// ---- Extra app: Calculator ----
+(function () {
+  var display = document.querySelector("#calcDisplay");
+  var keys = document.querySelector(".calc-keys");
+
+  var current = "0";
+  var previous = null;
+  var operator = null;
+  var waitingForOperand = false;
+
+  function fmt(n) {
+    if (!isFinite(n)) return "Error";
+    return String(parseFloat(n.toPrecision(12)));
+  }
+
+  function compute(a, b, op) {
+    if (op === "+") return a + b;
+    if (op === "-") return a - b;
+    if (op === "*") return a * b;
+    if (op === "/") return a / b;
+    return b;
+  }
+
+  function refresh() {
+    display.textContent = current;
+    document.querySelectorAll(".ckey.op").forEach(function (b) {
+      b.classList.toggle("armed", waitingForOperand && b.dataset.op === operator);
+    });
+  }
+
+  function inputDigit(d) {
+    if (waitingForOperand) { current = d; waitingForOperand = false; }
+    else { current = current === "0" ? d : current + d; }
+  }
+
+  function inputDot() {
+    if (waitingForOperand) { current = "0."; waitingForOperand = false; }
+    else if (current.indexOf(".") === -1) { current += "."; }
+  }
+
+  function clearAll() { current = "0"; previous = null; operator = null; waitingForOperand = false; }
+  function negate() { if (current !== "0") current = current.charAt(0) === "-" ? current.slice(1) : "-" + current; }
+  function percent() { current = fmt(parseFloat(current) / 100); }
+
+  function setOperator(next) {
+    var input = parseFloat(current);
+    if (operator !== null && waitingForOperand) { operator = next; return; }
+    if (previous === null) { previous = input; }
+    else if (operator) { previous = compute(previous, input, operator); current = fmt(previous); }
+    operator = next;
+    waitingForOperand = true;
+  }
+
+  function equals() {
+    if (operator === null) return;
+    var input = parseFloat(current);
+    current = fmt(compute(previous, input, operator));
+    previous = null;
+    operator = null;
+    waitingForOperand = true;
+  }
+
+  keys.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.num !== undefined) inputDigit(b.dataset.num);
+    else if (b.dataset.op) setOperator(b.dataset.op);
+    else if (b.dataset.action === "clear") clearAll();
+    else if (b.dataset.action === "negate") negate();
+    else if (b.dataset.action === "percent") percent();
+    else if (b.dataset.action === "dot") inputDot();
+    else if (b.dataset.action === "equals") equals();
+    refresh();
+  });
+
+  refresh();
+})();
+
+// ---- Extra app: Weather (live data, Open-Meteo, no API key) ----
+(function () {
+  var form = document.querySelector("#weatherForm");
+  var input = document.querySelector("#weatherInput");
+  var unitBtn = document.querySelector("#weatherUnit");
+  var currentEl = document.querySelector("#weatherCurrent");
+  var forecastEl = document.querySelector("#weatherForecast");
+
+  var useFahrenheit = true;
+  var lastQuery = null;
+
+  function setLoading() {
+    currentEl.innerHTML = '<div class="weather-loading">Loading&hellip;</div>';
+    forecastEl.innerHTML = "";
+  }
+  function setError(msg) {
+    var box = document.createElement("div");
+    box.className = "weather-error";
+    box.textContent = msg;
+    currentEl.innerHTML = "";
+    currentEl.appendChild(box);
+    forecastEl.innerHTML = "";
+  }
+
+  function codeInfo(code) {
+    if (code === 0) return { kind: "sun", text: "Clear sky" };
+    if (code === 1) return { kind: "sun", text: "Mainly clear" };
+    if (code === 2) return { kind: "partly", text: "Partly cloudy" };
+    if (code === 3) return { kind: "cloud", text: "Overcast" };
+    if (code === 45 || code === 48) return { kind: "fog", text: "Fog" };
+    if (code >= 51 && code <= 57) return { kind: "rain", text: "Drizzle" };
+    if (code >= 61 && code <= 67) return { kind: "rain", text: "Rain" };
+    if (code >= 71 && code <= 77) return { kind: "snow", text: "Snow" };
+    if (code >= 80 && code <= 82) return { kind: "rain", text: "Rain showers" };
+    if (code === 85 || code === 86) return { kind: "snow", text: "Snow showers" };
+    if (code >= 95) return { kind: "thunder", text: "Thunderstorm" };
+    return { kind: "cloud", text: "Cloudy" };
+  }
+
+  var cloud = '<g fill="#fff"><circle cx="16" cy="18" r="8"/><circle cx="26" cy="16" r="10"/><circle cx="12" cy="21" r="6"/><rect x="12" y="18" width="20" height="9" rx="4.5"/></g>';
+
+  function weatherIcon(kind, s) {
+    var open = '<svg width="' + s + '" height="' + s + '" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">';
+    if (kind === "sun") {
+      return open + '<g stroke="#ffd257" stroke-width="2.5" stroke-linecap="round">' +
+        '<line x1="20" y1="3" x2="20" y2="8"/><line x1="20" y1="32" x2="20" y2="37"/>' +
+        '<line x1="3" y1="20" x2="8" y2="20"/><line x1="32" y1="20" x2="37" y2="20"/>' +
+        '<line x1="8" y1="8" x2="11" y2="11"/><line x1="29" y1="29" x2="32" y2="32"/>' +
+        '<line x1="32" y1="8" x2="29" y2="11"/><line x1="11" y1="29" x2="8" y2="32"/></g>' +
+        '<circle cx="20" cy="20" r="8" fill="#ffd257"/></svg>';
+    }
+    if (kind === "partly") {
+      return open + '<circle cx="14" cy="14" r="7" fill="#ffd257"/>' +
+        '<g fill="#fff"><circle cx="20" cy="24" r="8"/><circle cx="29" cy="22" r="9"/><circle cx="15" cy="27" r="6"/><rect x="15" y="24" width="18" height="9" rx="4.5"/></g></svg>';
+    }
+    if (kind === "rain") {
+      return open + cloud + '<g stroke="#9fd3ff" stroke-width="2.5" stroke-linecap="round">' +
+        '<line x1="16" y1="30" x2="14" y2="36"/><line x1="23" y1="30" x2="21" y2="36"/><line x1="30" y1="30" x2="28" y2="36"/></g></svg>';
+    }
+    if (kind === "snow") {
+      return open + cloud + '<g fill="#eaf6ff"><circle cx="16" cy="33" r="2"/><circle cx="23" cy="33" r="2"/><circle cx="30" cy="33" r="2"/></g></svg>';
+    }
+    if (kind === "thunder") {
+      return open + cloud + '<polygon points="23,25 16,35 21,35 18,40 28,29 22,29 25,25" fill="#ffd257"/></svg>';
+    }
+    if (kind === "fog") {
+      return open + cloud + '<g stroke="#dfe8f5" stroke-width="2.5" stroke-linecap="round"><line x1="10" y1="31" x2="30" y2="31"/><line x1="13" y1="36" x2="27" y2="36"/></g></svg>';
+    }
+    return open + cloud + '</svg>'; // cloud
+  }
+
+  function render(data, place) {
+    var deg = useFahrenheit ? "°F" : "°C";
+    var cur = data.current;
+    var info = codeInfo(cur.weather_code);
+
+    currentEl.innerHTML = "";
+    var icon = document.createElement("div");
+    icon.innerHTML = weatherIcon(info.kind, 64);
+    var text = document.createElement("div");
+
+    var place2 = document.createElement("div"); place2.className = "wplace"; place2.textContent = place;
+    var temp = document.createElement("div"); temp.className = "wtemp"; temp.textContent = Math.round(cur.temperature_2m) + "°";
+    var cond = document.createElement("div"); cond.className = "wcond"; cond.textContent = info.text;
+    var feels = document.createElement("div"); feels.className = "wfeels"; feels.textContent = "Feels like " + Math.round(cur.apparent_temperature) + deg;
+    text.appendChild(place2); text.appendChild(temp); text.appendChild(cond); text.appendChild(feels);
+    currentEl.appendChild(icon); currentEl.appendChild(text);
+
+    forecastEl.innerHTML = "";
+    var days = data.daily.time;
+    for (var i = 0; i < Math.min(5, days.length); i++) {
+      var d = document.createElement("div"); d.className = "wday";
+      var name = document.createElement("div"); name.className = "wdname";
+      name.textContent = i === 0 ? "Today" : new Date(days[i] + "T12:00:00").toLocaleDateString([], { weekday: "short" });
+      var ic = document.createElement("div"); ic.innerHTML = weatherIcon(codeInfo(data.daily.weather_code[i]).kind, 30);
+      var hi = document.createElement("div"); hi.className = "whi"; hi.textContent = Math.round(data.daily.temperature_2m_max[i]) + "°";
+      var lo = document.createElement("div"); lo.className = "wlo"; lo.textContent = Math.round(data.daily.temperature_2m_min[i]) + "°";
+      d.appendChild(name); d.appendChild(ic); d.appendChild(hi); d.appendChild(lo);
+      forecastEl.appendChild(d);
+    }
+  }
+
+  function loadByCoords(lat, lon, place) {
+    setLoading();
+    lastQuery = { lat: lat, lon: lon, place: place };
+    var unit = useFahrenheit ? "fahrenheit" : "celsius";
+    var url = "https://api.open-meteo.com/v1/forecast?timezone=auto" +
+      "&current=temperature_2m,weather_code,apparent_temperature" +
+      "&daily=weather_code,temperature_2m_max,temperature_2m_min" +
+      "&temperature_unit=" + unit + "&latitude=" + lat + "&longitude=" + lon;
+    fetch(url)
+      .then(function (r) { return r.json(); })
+      .then(function (j) { render(j, place); })
+      .catch(function () { setError("Couldn't load the forecast."); });
+  }
+
+  function searchCity(name) {
+    setLoading();
+    fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&name=" + encodeURIComponent(name))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j.results || !j.results.length) { setError('Couldn\'t find "' + name + '".'); return; }
+        var g = j.results[0];
+        var place = g.name + (g.country_code ? ", " + g.country_code : "");
+        loadByCoords(g.latitude, g.longitude, place);
+      })
+      .catch(function () { setError("Couldn't reach the weather service."); });
+  }
+
+  unitBtn.addEventListener("click", function () {
+    useFahrenheit = !useFahrenheit;
+    unitBtn.textContent = useFahrenheit ? "°F" : "°C";
+    if (lastQuery) loadByCoords(lastQuery.lat, lastQuery.lon, lastQuery.place);
+  });
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var q = input.value.trim();
+    if (q) searchCity(q);
+  });
+
+  // first load: try geolocation, fall back to a default city
+  setLoading();
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function (pos) { loadByCoords(pos.coords.latitude, pos.coords.longitude, "My location"); },
+      function () { searchCity("San Francisco"); },
+      { timeout: 6000 }
+    );
+  } else {
+    searchCity("San Francisco");
+  }
+})();
+
 // ---- wire up the icons + windows ----
 initializeIcon("welcomeicon", "welcome");
 initializeIcon("notesicon", "notes");
 initializeIcon("projectsicon", "projects");
+initializeIcon("calcicon", "calc");
+initializeIcon("weathericon", "weather");
 
 initializeWindow("welcome");
 initializeWindow("notes");
 initializeWindow("projects");
+initializeWindow("calc");
+initializeWindow("weather");
