@@ -1,24 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Ellie OS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blackbird OS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      color: white;
+      /* wallpaper */
+      background: linear-gradient(135deg, #1e3c72, #2a5298, #6dd5ed);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 12px;
+    }
+
+    #clock {
+      font-size: 84px;
+      font-weight: 200;
+      letter-spacing: -2px;
+    }
+
+    #date {
+      font-size: 20px;
+      opacity: 0.9;
+      margin-bottom: 24px;
+    }
+
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.15);
+    }
+
+    .name { font-size: 24px; font-weight: 600; }
+
+    .tagline {
+      font-size: 16px;
+      opacity: 0.9;
+      max-width: 420px;
+      line-height: 1.5;
+    }
+
+    .links { margin-top: 8px; font-size: 16px; }
+    .links a { color: white; text-decoration: none; }
+    .links a:hover { text-decoration: underline; }
+  </style>
 </head>
-<body style="font-family: sans-serif; background-color: #eef; text-align: center; padding: 40px;">
+<body>
 
-  <img src="https://api.dicebear.com/9.x/thumbs/svg?seed=Ellie" alt="my avatar" width="120" height="120">
+  <div id="clock">--:--</div>
+  <div id="date">Welcome</div>
 
-  <h1>Welcome! I'm Ellie 👋</h1>
+  <div class="avatar"></div>
+  <div class="name">Blackbird</div>
 
-  <p>This is my personal WebOS. Take a look around to get a sense of who I am.</p>
+  <p class="tagline">
+    Welcome to my WebOS. I like building things, games, learning, and coffee.
+  </p>
 
-  <h2>Things I like</h2>
-  <p>Building things · Games · Learning · Coffee</p>
-
-  <h2>Find me</h2>
-  <p>
-    <a href="https://github.com/Blackbird-alt">GitHub</a> |
+  <p class="links">
+    <a href="https://github.com/flyingchickensaucer">GitHub</a> ·
     <a href="mailto:ellie.zhang@alphaaiengineering.com">Email</a>
   </p>
 
+  <script>
+    // Live clock on the welcome screen
+    function tick() {
+      const now = new Date();
+      document.getElementById("clock").textContent =
+        now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      document.getElementById("date").textContent =
+        now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+    }
+    tick();
+    setInterval(tick, 1000);
+  </script>
 </body>
 </html>
