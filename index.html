@@ -17,6 +17,9 @@
       <span id="projectsopen">Projects</span>
       <span id="calcopen">Calculator</span>
       <span id="weatheropen">Weather</span>
+      <span id="galleryopen">Gallery</span>
+      <span id="searchopen">Search</span>
+      <span id="settingsopen">Settings</span>
       <span id="timeElement">Time</span>
     </div>
   </div>
@@ -42,6 +45,52 @@
     <div class="appicon" id="weathericon">
       <div class="glyph"><img src="weather.png" alt="Weather"></div>
       <p>Weather</p>
+    </div>
+    <div class="appicon" id="galleryicon">
+      <div class="glyph tile">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="galG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff6a88"/><stop offset="1" stop-color="#ff99ac"/>
+          </linearGradient></defs>
+          <rect width="64" height="64" rx="16" fill="url(#galG)"/>
+          <rect x="14" y="16" width="36" height="30" rx="4" fill="#fff"/>
+          <circle cx="41" cy="25" r="4" fill="#ffb347"/>
+          <path d="M16 44 L26 32 L33 39 L43 28 L48 34 L48 44 Z" fill="#7ec8e3"/>
+        </svg>
+      </div>
+      <p>Gallery</p>
+    </div>
+    <div class="appicon" id="searchicon">
+      <div class="glyph tile">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="srcG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#4a90e2"/><stop offset="1" stop-color="#357abd"/>
+          </linearGradient></defs>
+          <rect width="64" height="64" rx="16" fill="url(#srcG)"/>
+          <circle cx="28" cy="28" r="11" fill="none" stroke="#fff" stroke-width="4"/>
+          <line x1="36" y1="36" x2="47" y2="47" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p>Search</p>
+    </div>
+    <div class="appicon" id="settingsicon">
+      <div class="glyph tile">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="setG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#8e9eab"/><stop offset="1" stop-color="#59636e"/>
+          </linearGradient></defs>
+          <rect width="64" height="64" rx="16" fill="url(#setG)"/>
+          <g stroke="rgba(255,255,255,0.55)" stroke-width="3" stroke-linecap="round">
+            <line x1="18" y1="24" x2="46" y2="24"/>
+            <line x1="18" y1="34" x2="46" y2="34"/>
+            <line x1="18" y1="44" x2="46" y2="44"/>
+          </g>
+          <g fill="#fff">
+            <circle cx="39" cy="24" r="5"/><circle cx="25" cy="34" r="5"/><circle cx="43" cy="44" r="5"/>
+          </g>
+        </svg>
+      </div>
+      <p>Settings</p>
     </div>
   </div>
 
@@ -159,6 +208,68 @@
       </form>
       <div class="weather-current" id="weatherCurrent"></div>
       <div class="weather-forecast" id="weatherForecast"></div>
+    </div>
+  </div>
+
+  <!-- App: Gallery -->
+  <div class="window" id="gallery" style="top: calc(50% - 240px); left: calc(50% - 300px); display: none;">
+    <div class="windowheader" id="galleryheader">
+      <div class="closebutton" id="galleryclose"></div>
+      <p class="headertext">Gallery</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="gallerybody">
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <div class="gallery-viewer" id="galleryViewer">
+        <img id="galleryViewerImg" alt="" />
+        <div class="gallery-caption" id="galleryCaption"></div>
+        <button type="button" id="galleryBack">&larr; Back to gallery</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App: Web Search -->
+  <div class="window" id="search" style="top: calc(50% - 180px); left: calc(50% - 220px); display: none;">
+    <div class="windowheader" id="searchheader">
+      <div class="closebutton" id="searchclose"></div>
+      <p class="headertext">Search</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="searchbody">
+      <form class="web-search" id="webSearchForm">
+        <input id="webSearchInput" placeholder="Search the web..." autocomplete="off" />
+        <button type="submit">Search</button>
+      </form>
+      <div class="engines" id="searchEngines"></div>
+      <p class="search-note">Results open in a new tab.</p>
+    </div>
+  </div>
+
+  <!-- App: Settings -->
+  <div class="window" id="settings" style="top: calc(50% - 250px); left: calc(50% - 180px); display: none;">
+    <div class="windowheader" id="settingsheader">
+      <div class="closebutton" id="settingsclose"></div>
+      <p class="headertext">Settings</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="settingsbody">
+      <section class="setting-group">
+        <h3>Wallpaper</h3>
+        <div class="wallpaper-options" id="wallpaperOptions"></div>
+      </section>
+      <section class="setting-group">
+        <h3>Desktop</h3>
+        <button type="button" class="setting-btn" id="resetIcons">Reset icon layout</button>
+      </section>
+      <section class="setting-group">
+        <h3>Notes</h3>
+        <button type="button" class="setting-btn danger" id="resetNotes">Reset notes to default</button>
+      </section>
+      <section class="setting-group about">
+        <h3>About</h3>
+        <p>Blackbird OS &middot; a little web desktop</p>
+        <p class="muted">Built for Hack Club Stardance</p>
+      </section>
     </div>
   </div>
 

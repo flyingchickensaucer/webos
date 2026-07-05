@@ -739,17 +739,154 @@ renderProjects();
   searchCity("San Francisco");
 })();
 
+// ---- App: Gallery (shows every image in the OS) ----
+var galleryImages = [
+  { src: "pfp.png", caption: "Profile" },
+  { src: "background.png", caption: "Wallpaper" },
+  { src: "notes.png", caption: "Notes" },
+  { src: "projects.png", caption: "Projects" },
+  { src: "calculator.png", caption: "Calculator" },
+  { src: "weather.png", caption: "Weather" }
+];
+
+function renderGallery() {
+  var grid = document.querySelector("#galleryGrid");
+  grid.innerHTML = "";
+  galleryImages.forEach(function (img) {
+    var thumb = document.createElement("div");
+    thumb.className = "gallery-thumb";
+    var im = document.createElement("img");
+    im.src = img.src;
+    im.alt = img.caption;
+    var cap = document.createElement("span");
+    cap.textContent = img.caption;
+    thumb.appendChild(im);
+    thumb.appendChild(cap);
+    thumb.addEventListener("click", function () { openGalleryImage(img); });
+    grid.appendChild(thumb);
+  });
+}
+
+function openGalleryImage(img) {
+  document.querySelector("#galleryGrid").style.display = "none";
+  document.querySelector("#galleryViewer").style.display = "flex";
+  document.querySelector("#galleryViewerImg").src = img.src;
+  document.querySelector("#galleryCaption").textContent = img.caption;
+}
+
+document.querySelector("#galleryBack").addEventListener("click", function () {
+  document.querySelector("#galleryViewer").style.display = "none";
+  document.querySelector("#galleryGrid").style.display = "grid";
+});
+
+renderGallery();
+
+// ---- App: Web Search ----
+var engines = [
+  { id: "ddg", label: "DuckDuckGo", url: "https://duckduckgo.com/?q=" },
+  { id: "google", label: "Google", url: "https://www.google.com/search?q=" },
+  { id: "wikipedia", label: "Wikipedia", url: "https://en.wikipedia.org/w/index.php?search=" },
+  { id: "youtube", label: "YouTube", url: "https://www.youtube.com/results?search_query=" }
+];
+var selectedEngine = "ddg";
+
+function renderEngines() {
+  var box = document.querySelector("#searchEngines");
+  box.innerHTML = "";
+  engines.forEach(function (e) {
+    var pill = document.createElement("span");
+    pill.className = "engine-pill" + (e.id === selectedEngine ? " active" : "");
+    pill.textContent = e.label;
+    pill.addEventListener("click", function () { selectedEngine = e.id; renderEngines(); });
+    box.appendChild(pill);
+  });
+}
+renderEngines();
+
+document.querySelector("#webSearchForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var q = document.querySelector("#webSearchInput").value.trim();
+  if (!q) return;
+  var eng = engines.filter(function (x) { return x.id === selectedEngine; })[0] || engines[0];
+  window.open(eng.url + encodeURIComponent(q), "_blank", "noopener");
+});
+
+// ---- App: Settings ----
+var WALLPAPER_KEY = "blackbird-wallpaper";
+var wallpapers = [
+  { id: "photo", css: '#1e3c72 url("background.png") center / cover no-repeat', swatch: 'center / cover no-repeat url("background.png")' },
+  { id: "ocean", css: 'linear-gradient(135deg,#1e3c72,#2a5298,#6dd5ed)', swatch: 'linear-gradient(135deg,#1e3c72,#2a5298,#6dd5ed)' },
+  { id: "sunset", css: 'linear-gradient(135deg,#ff7e5f,#feb47b)', swatch: 'linear-gradient(135deg,#ff7e5f,#feb47b)' },
+  { id: "forest", css: 'linear-gradient(135deg,#11998e,#38ef7d)', swatch: 'linear-gradient(135deg,#11998e,#38ef7d)' },
+  { id: "night", css: '#0b1020', swatch: '#0b1020' }
+];
+
+function wallpaperById(id) {
+  return wallpapers.filter(function (w) { return w.id === id; })[0];
+}
+
+function currentWallpaperId() {
+  try { return localStorage.getItem(WALLPAPER_KEY) || "photo"; } catch (e) { return "photo"; }
+}
+
+function setWallpaper(id) {
+  var w = wallpaperById(id) || wallpapers[0];
+  document.body.style.background = w.css;
+  try { localStorage.setItem(WALLPAPER_KEY, w.id); } catch (e) {}
+  renderWallpaperOptions();
+}
+
+function renderWallpaperOptions() {
+  var box = document.querySelector("#wallpaperOptions");
+  box.innerHTML = "";
+  var active = currentWallpaperId();
+  wallpapers.forEach(function (w) {
+    var s = document.createElement("div");
+    s.className = "wallpaper-swatch" + (w.id === active ? " active" : "");
+    s.style.background = w.swatch;
+    s.addEventListener("click", function () { setWallpaper(w.id); });
+    box.appendChild(s);
+  });
+}
+
+document.querySelector("#resetIcons").addEventListener("click", function () {
+  iconPositions = {};
+  saveIconPositions();
+  layoutIcons();
+});
+
+document.querySelector("#resetNotes").addEventListener("click", function () {
+  content = JSON.parse(JSON.stringify(defaultNotes));
+  saveNotes();
+  renderSidebar();
+  openNote(0);
+});
+
+renderWallpaperOptions();
+
+// apply the saved wallpaper on startup
+(function () {
+  var w = wallpaperById(currentWallpaperId());
+  if (w) document.body.style.background = w.css;
+})();
+
 // ---- wire up the icons + windows ----
 initializeIcon("welcomeicon", "welcome");
 initializeIcon("notesicon", "notes");
 initializeIcon("projectsicon", "projects");
 initializeIcon("calcicon", "calc");
 initializeIcon("weathericon", "weather");
+initializeIcon("galleryicon", "gallery");
+initializeIcon("searchicon", "search");
+initializeIcon("settingsicon", "settings");
 
 initializeWindow("welcome");
 initializeWindow("notes");
 initializeWindow("projects");
 initializeWindow("calc");
 initializeWindow("weather");
+initializeWindow("gallery");
+initializeWindow("search");
+initializeWindow("settings");
 
 layoutIcons();
