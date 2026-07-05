@@ -720,7 +720,9 @@ renderProjects();
     if (q) searchCity(q);
   });
 
-  useMyLocation();
+  // don't detect location automatically — show a default city, and only use
+  // the visitor's location if they choose to tap the locate button
+  searchCity("San Francisco");
 })();
 
 // ---- wire up the icons + windows ----
