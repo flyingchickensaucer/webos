@@ -171,13 +171,22 @@ function saveIconPositions() {
 
 function layoutIcons() {
   var apps = document.querySelectorAll(".appicon");
+  // how many icons fit in one column before we wrap to the next
+  var available = window.innerHeight - GRID_ORIGIN_Y - 10;
+  var perCol = Math.max(1, Math.floor(available / GRID));
   apps.forEach(function (icon, i) {
     var saved = iconPositions[icon.id];
-    // default column, or snap any saved position onto the grid
-    var x = saved ? snapToGrid(saved.x, GRID_ORIGIN_X) : GRID_ORIGIN_X;
-    var y = saved ? snapToGrid(saved.y, GRID_ORIGIN_Y) : GRID_ORIGIN_Y + i * GRID;
-    icon.style.left = x + "px";
-    icon.style.top = y + "px";
+    if (saved) {
+      // snap any saved (dragged) position onto the grid
+      icon.style.left = snapToGrid(saved.x, GRID_ORIGIN_X) + "px";
+      icon.style.top = snapToGrid(saved.y, GRID_ORIGIN_Y) + "px";
+    } else {
+      // default layout: fill a column top-to-bottom, then wrap to the next column
+      var col = Math.floor(i / perCol);
+      var row = i % perCol;
+      icon.style.left = (GRID_ORIGIN_X + col * GRID) + "px";
+      icon.style.top = (GRID_ORIGIN_Y + row * GRID) + "px";
+    }
   });
 }
 
