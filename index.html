@@ -4,86 +4,70 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blackbird OS</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      color: white;
-      /* wallpaper */
-      background: linear-gradient(135deg, #1e3c72, #2a5298, #6dd5ed);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 12px;
-    }
-
-    #clock {
-      font-size: 84px;
-      font-weight: 200;
-      letter-spacing: -2px;
-    }
-
-    #date {
-      font-size: 20px;
-      opacity: 0.9;
-      margin-bottom: 24px;
-    }
-
-    .avatar {
-      width: 96px;
-      height: 96px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.7);
-      background: rgba(255,255,255,0.15);
-    }
-
-    .name { font-size: 24px; font-weight: 600; }
-
-    .tagline {
-      font-size: 16px;
-      opacity: 0.9;
-      max-width: 420px;
-      line-height: 1.5;
-    }
-
-    .links { margin-top: 8px; font-size: 16px; }
-    .links a { color: white; text-decoration: none; }
-    .links a:hover { text-decoration: underline; }
-  </style>
+  <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 <body>
 
-  <div id="clock">--:--</div>
-  <div id="date">Welcome</div>
+  <!-- Part 2: top bar with OS name + live clock, plus app launchers -->
+  <div id="top">
+    <span class="brand">Blackbird OS</span>
+    <div class="menu">
+      <span id="welcomeopen">Welcome</span>
+      <span id="notesopen">Notes</span>
+      <span id="timeElement">Time</span>
+    </div>
+  </div>
 
-  <div class="avatar"></div>
-  <div class="name">Blackbird</div>
+  <!-- Part 4: desktop app icons -->
+  <div id="desktopApps">
+    <div class="appicon" id="notesicon" onclick="handleIconTap(this)" ondblclick="openWindow(document.querySelector('#notes'))">
+      <div class="glyph"><img src="notes.jpg" alt="Notes"></div>
+      <p>Notes</p>
+    </div>
+    <div class="appicon" id="welcomeicon" onclick="handleIconTap(this)" ondblclick="openWindow(document.querySelector('#welcome'))">
+      <div class="glyph"><img src="blackbird.webp" alt="Blackbird"></div>
+      <p>Welcome</p>
+    </div>
+  </div>
 
-  <p class="tagline">
-    Welcome to my WebOS. I like building things, games, learning, and coffee.
-  </p>
+  <!-- Part 3: welcome window, draggable + closable -->
+  <div class="window" id="welcome" style="top: calc(50% - 200px); left: calc(50% - 190px);">
+    <div class="windowheader" id="welcomeheader">
+      <div class="closebutton" id="welcomeclose"></div>
+      <p class="headertext">Welcome</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="welcomebody">
+      <div id="clock">--:--</div>
+      <div id="date">Welcome</div>
 
-  <p class="links">
-    <a href="https://github.com/flyingchickensaucer">GitHub</a> ·
-    <a href="mailto:ellie.zhang@alphaaiengineering.com">Email</a>
-  </p>
+      <div class="avatar"><img src="blackbird.webp" alt="Blackbird"></div>
+      <div class="name">Blackbird</div>
 
-  <script>
-    // Live clock on the welcome screen
-    function tick() {
-      const now = new Date();
-      document.getElementById("clock").textContent =
-        now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      document.getElementById("date").textContent =
-        now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
-    }
-    tick();
-    setInterval(tick, 1000);
-  </script>
+      <p class="tagline">
+        Welcome to my WebOS. I like building things, games, learning, and coffee.
+        Double-click an icon to open an app, and drag windows by their header.
+      </p>
+
+      <p class="links">
+        <a href="https://github.com/flyingchickensaucer" target="_blank">GitHub</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Part 4: first app — a personalized Notes app with sidebar + content -->
+  <div class="window" id="notes" style="top: calc(50% - 230px); left: calc(50% - 100px); display: none;">
+    <div class="windowheader" id="notesheader">
+      <div class="closebutton" id="notesclose"></div>
+      <p class="headertext">Notes</p>
+      <div class="spacer"></div>
+    </div>
+    <div class="appbody">
+      <div id="sidebar"></div>
+      <div id="notecontent"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
