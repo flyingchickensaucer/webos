@@ -39,8 +39,9 @@ function dragElement(element) {
     currentY = initialY - e.clientY;
     initialX = e.clientX;
     initialY = e.clientY;
-    element.style.top = (element.offsetTop - currentY) + "px";
-    element.style.left = (element.offsetLeft - currentX) + "px";
+    var p = clampWindowPos(element, element.offsetLeft - currentX, element.offsetTop - currentY);
+    element.style.top = p.top + "px";
+    element.style.left = p.left + "px";
   }
 
   function stopDragging() {
@@ -53,11 +54,29 @@ function dragElement(element) {
 var biggestIndex = 1;
 var topBar = document.querySelector("#top");
 
+// keep a window fully on screen (pin to top-left if it's bigger than the viewport)
+function clampWindowPos(element, left, top) {
+  var margin = 6;
+  var topBarH = 40;
+  var maxLeft = window.innerWidth - element.offsetWidth - margin;
+  var maxTop = window.innerHeight - element.offsetHeight - margin;
+  if (maxLeft < margin) maxLeft = margin;
+  if (maxTop < topBarH) maxTop = topBarH;
+  return {
+    left: Math.min(Math.max(left, margin), maxLeft),
+    top: Math.min(Math.max(top, topBarH), maxTop)
+  };
+}
+
 function openWindow(element) {
   element.style.display = "flex";
   biggestIndex++;
   element.style.zIndex = biggestIndex;
   topBar.style.zIndex = biggestIndex + 1;
+  // nudge it fully on screen after it's laid out
+  var p = clampWindowPos(element, element.offsetLeft, element.offsetTop);
+  element.style.left = p.left + "px";
+  element.style.top = p.top + "px";
 }
 
 function closeWindow(element) {
@@ -890,3 +909,11 @@ initializeWindow("search");
 initializeWindow("settings");
 
 layoutIcons();
+
+// the welcome window is visible on load — make sure it starts on screen too
+(function () {
+  var w = document.querySelector("#welcome");
+  var p = clampWindowPos(w, w.offsetLeft, w.offsetTop);
+  w.style.left = p.left + "px";
+  w.style.top = p.top + "px";
+})();
