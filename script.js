@@ -137,17 +137,28 @@ function loadIconPositions() {
 
 var iconPositions = loadIconPositions();
 
+// desktop grid the icons snap to
+var GRID = 100;
+var GRID_ORIGIN_X = 16;
+var GRID_ORIGIN_Y = 72;
+
+function snapToGrid(v, origin) {
+  return origin + Math.round((v - origin) / GRID) * GRID;
+}
+
 function saveIconPositions() {
   try { localStorage.setItem(ICON_KEY, JSON.stringify(iconPositions)); } catch (e) {}
 }
 
 function layoutIcons() {
   var apps = document.querySelectorAll(".appicon");
-  var startY = 72, gap = 100, x = 16;
   apps.forEach(function (icon, i) {
     var saved = iconPositions[icon.id];
-    icon.style.left = (saved ? saved.x : x) + "px";
-    icon.style.top = (saved ? saved.y : startY + i * gap) + "px";
+    // default column, or snap any saved position onto the grid
+    var x = saved ? snapToGrid(saved.x, GRID_ORIGIN_X) : GRID_ORIGIN_X;
+    var y = saved ? snapToGrid(saved.y, GRID_ORIGIN_Y) : GRID_ORIGIN_Y + i * GRID;
+    icon.style.left = x + "px";
+    icon.style.top = y + "px";
   });
 }
 
@@ -174,8 +185,11 @@ function makeIconDraggable(icon) {
       icon.classList.add("dragging");
     }
     if (moved) {
-      var nx = Math.max(0, Math.min(originLeft + dx, window.innerWidth - icon.offsetWidth));
-      var ny = Math.max(44, Math.min(originTop + dy, window.innerHeight - icon.offsetHeight));
+      // snap the icon to the nearest grid cell as it moves
+      var nx = snapToGrid(originLeft + dx, GRID_ORIGIN_X);
+      var ny = snapToGrid(originTop + dy, GRID_ORIGIN_Y);
+      nx = Math.max(0, Math.min(nx, window.innerWidth - icon.offsetWidth));
+      ny = Math.max(GRID_ORIGIN_Y, Math.min(ny, window.innerHeight - icon.offsetHeight));
       icon.style.left = nx + "px";
       icon.style.top = ny + "px";
     }
